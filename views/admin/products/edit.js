@@ -3,6 +3,7 @@ const { getError } = require('../../helpers');
 
 module.exports = ({ errors, product, csrfToken }) => {
   return layout({
+    isLoggedIn: true,
     content: `
       <div class="columns is-centered">
         <div class="column is-half">

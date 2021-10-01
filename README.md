@@ -8,4 +8,5 @@ This version also features:
 
 - Increase / decrease quantities in cart
 - CSRF protection
+- Sign out button and landing page
 - Small bugfixes

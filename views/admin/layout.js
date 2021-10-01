@@ -1,4 +1,11 @@
-module.exports = ({ content }) => {
+module.exports = ({ content, isLoggedIn }) => {
+  const signoutButton = isLoggedIn
+    ? '<div class="navbar-item"><a href="/signout"><i class="fa fa-sign-out-alt"></i> Sign out</a></div>'
+    : '';
+  const productsLink = isLoggedIn
+    ? '<div class="navbar-item"><a href="/admin/products"><i class="fa fa-star"></i> Products</a></div>'
+    : '';
+
   return `
     <!DOCTYPE html>
       <html lang="en">
@@ -22,9 +29,8 @@ module.exports = ({ content }) => {
               </div>
               <div class="navbar-item">
                 <div class="navbar-buttons">
-                  <div class="navbar-item">
-                    <a href="/admin/products"><i class="fa fa-star"></i> Products</a>
-                  </div>
+                  ${productsLink}
+                  ${signoutButton}
                 </div>
               </div>
             </div>

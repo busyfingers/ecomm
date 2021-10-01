@@ -26,6 +26,7 @@ module.exports = ({ products, csrfToken }) => {
     .join('');
 
   return layout({
+    isLoggedIn: true,
     content: `
       <div class="control">
         <h1 class="subtitle">Products</h1>  

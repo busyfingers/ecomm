@@ -2,6 +2,7 @@ const express = require('express');
 const usersRepo = require('../../repositories/users');
 const signupTemplate = require('../../views/admin/auth/signup');
 const signinTemplate = require('../../views/admin/auth/signin');
+const signoutTemplate = require('../../views/admin/auth/signout');
 const { handleErrors } = require('./middlewares');
 const {
   requireEmail,
@@ -32,7 +33,7 @@ router.post(
 
 router.get('/signout', (req, res) => {
   req.session = null;
-  res.send('You are logged out');
+  res.send(signoutTemplate({}));
 });
 
 router.get('/signin', (req, res) => {
