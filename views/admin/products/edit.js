@@ -1,7 +1,7 @@
 const layout = require('../layout');
 const { getError } = require('../../helpers');
 
-module.exports = ({ product, errors }) => {
+module.exports = ({ errors, product, csrfToken }) => {
   return layout({
     content: `
       <div class="columns is-centered">
@@ -9,6 +9,7 @@ module.exports = ({ product, errors }) => {
           <h1 class="subtitle">Edit a Product</h1>
 
           <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="${csrfToken}">
             <div class="field">
               <label class="label">Title</label>
               <input value="${

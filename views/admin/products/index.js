@@ -1,6 +1,6 @@
 const layout = require('../layout');
 
-module.exports = ({ products }) => {
+module.exports = ({ products, csrfToken }) => {
   const renderedProducts = products
     .map(product => {
       return `
@@ -16,6 +16,7 @@ module.exports = ({ products }) => {
         </td>
         <td>
           <form method="POST" action="/admin/products/${product.id}/delete">
+            <input type="hidden" name="_csrf" value="${csrfToken}">
             <button class="button is-danger">Delete</button>
           </form>
         </td>

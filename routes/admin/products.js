@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const csrf = require('csurf');
 
 const { handleErrors, requireAuth } = require('./middlewares');
 const productsRepo = require('../../repositories/products');
@@ -10,14 +11,15 @@ const { requireTitle, requirePrice } = require('./validators');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
+const csrfProtection = csrf();
 
-router.get('/admin/products', requireAuth, async (req, res) => {
+router.get('/admin/products', csrfProtection, requireAuth, async (req, res) => {
   const products = await productsRepo.getAll();
-  res.send(productsIndexTemplate({ products }));
+  res.send(productsIndexTemplate({ products, csrfToken: req.csrfToken() }));
 });
 
-router.get('/admin/products/new', requireAuth, (req, res) => {
-  res.send(productsNewTemplate({}));
+router.get('/admin/products/new', csrfProtection, requireAuth, (req, res) => {
+  res.send(productsNewTemplate({ errors: null, csrfToken: req.csrfToken() }));
 });
 
 // Using multer (upload.single('image')) also puts the form fields into req.body.
@@ -27,8 +29,11 @@ router.post(
   '/admin/products/new',
   requireAuth,
   upload.single('image'),
+  csrfProtection,
   [requireTitle, requirePrice],
-  handleErrors(productsNewTemplate),
+  handleErrors(productsNewTemplate, (req, res) => {
+    return { csrfToken: req.csrfToken() };
+  }),
   async (req, res) => {
     let image = '';
     if (req.file) {
@@ -41,24 +46,36 @@ router.post(
   }
 );
 
-router.get('/admin/products/:id/edit', requireAuth, async (req, res) => {
-  const product = await productsRepo.getOne(req.params.id);
+router.get(
+  '/admin/products/:id/edit',
+  csrfProtection,
+  requireAuth,
+  async (req, res) => {
+    const product = await productsRepo.getOne(req.params.id);
 
-  if (!product) {
-    return res.status(404).send('Product not found');
+    if (!product) {
+      return res.status(404).send('Product not found');
+    }
+
+    res.send(
+      productsEditTemplate({
+        errors: null,
+        product,
+        csrfToken: req.csrfToken()
+      })
+    );
   }
-
-  res.send(productsEditTemplate({ product }));
-});
+);
 
 router.post(
   '/admin/products/:id/edit',
   requireAuth,
   upload.single('image'),
+  csrfProtection,
   [requireTitle, requirePrice],
   handleErrors(productsEditTemplate, async req => {
     const product = await productsRepo.getOne(req.params.id);
-    return { product };
+    return { product, csrfToken: req.csrfToken() };
   }),
   async (req, res) => {
     const changes = req.body;
@@ -77,10 +94,15 @@ router.post(
   }
 );
 
-router.post('/admin/products/:id/delete', requireAuth, async (req, res) => {
-  await productsRepo.delete(req.params.id);
+router.post(
+  '/admin/products/:id/delete',
+  requireAuth,
+  csrfProtection,
+  async (req, res) => {
+    await productsRepo.delete(req.params.id);
 
-  res.redirect('/admin/products');
-});
+    res.redirect('/admin/products');
+  }
+);
 
 module.exports = router;
