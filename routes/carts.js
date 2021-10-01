@@ -38,11 +38,14 @@ router.get('/cart', async (req, res) => {
   let cart;
 
   if (!req.session.cartId) {
-    cart = await createCart({ items: [] });
-    req.session.cartId = cart.id;
+    cart = await initCart(req);
+  } else {
+    cart = await cartsRepo.getOne(req.session.cartId);
   }
 
-  cart = await cartsRepo.getOne(req.session.cartId);
+  if (!cart) {
+    cart = await initCart(req);
+  }
 
   for (let item of cart.items) {
     item.product = await productsRepo.getOne(item.id);
@@ -85,6 +88,13 @@ router.post('/cart/products/edit', async (req, res) => {
 
 createCart = async content => {
   return await cartsRepo.create(content);
+};
+
+initCart = async req => {
+  const cart = await createCart({ items: [] });
+  req.session.cartId = cart.id;
+
+  return cart;
 };
 
 module.exports = router;
