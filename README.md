@@ -9,4 +9,6 @@ This version also features:
 - Increase / decrease quantities in cart
 - CSRF protection
 - Sign out button and landing page
+- MongoDB is used for storage instead of plain text files
+- Configuration via file
 - Small bugfixes
