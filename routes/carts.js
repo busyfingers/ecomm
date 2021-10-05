@@ -12,9 +12,9 @@ router.post('/cart/products', async (req, res) => {
     cart = await createCart({
       items: [{ id: req.body.productId, quantity: 1 }]
     });
-    req.session.cartId = cart.id;
+    req.session.cartId = cart._id.toString();
   } else {
-    cart = await cartsRepo.getOne(req.session.cartId);
+    cart = await ensureCart(req);
 
     const existingItem = cart.items.find(
       item => item.id === req.body.productId
@@ -26,11 +26,10 @@ router.post('/cart/products', async (req, res) => {
       cart.items.push({ id: req.body.productId, quantity: 1 });
     }
 
-    await cartsRepo.update(cart.id, {
+    await cartsRepo.update(req.session.cartId, {
       items: cart.items
     });
   }
-
   res.redirect('/cart');
 });
 
@@ -40,18 +39,14 @@ router.get('/cart', async (req, res) => {
   if (!req.session.cartId) {
     cart = await initCart(req);
   } else {
-    cart = await cartsRepo.getOne(req.session.cartId);
-  }
-
-  if (!cart) {
-    cart = await initCart(req);
+    cart = await ensureCart(req, true);
   }
 
   for (let item of cart.items) {
     item.product = await productsRepo.getOne(item.id);
   }
 
-  res.send(cartShowTemplate({ items: cart.items }));
+  res.send(cartShowTemplate({ items: cart.items || [] }));
 });
 
 router.post('/cart/products/delete', async (req, res) => {
@@ -86,13 +81,29 @@ router.post('/cart/products/edit', async (req, res) => {
   res.redirect('/cart');
 });
 
+ensureCart = async (req, empty) => {
+  let cart = await cartsRepo.getOne(req.session.cartId);
+
+  if (!cart) {
+    const content = empty
+      ? { items: [] }
+      : {
+          items: [{ id: req.body.productId, quantity: 1 }]
+        };
+    cart = await createCart(content);
+    req.session.cartId = cart._id.toString();
+  }
+
+  return cart;
+};
+
 createCart = async content => {
   return await cartsRepo.create(content);
 };
 
 initCart = async req => {
   const cart = await createCart({ items: [] });
-  req.session.cartId = cart.id;
+  req.session.cartId = cart._id.toString();
 
   return cart;
 };

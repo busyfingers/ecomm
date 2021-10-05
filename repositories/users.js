@@ -1,23 +1,20 @@
 const crypto = require('crypto');
 const util = require('util');
+const { getDb } = require('./mongoUtil');
 const Repository = require('./repository');
 
 const scrypt = util.promisify(crypto.scrypt);
 
 class UsersRepository extends Repository {
   async create(attrs) {
-    attrs.id = await this.randomId();
     const salt = crypto.randomBytes(8).toString('hex');
     const buf = await scrypt(attrs.password, salt, 64);
-    const records = await this.getAll();
     const newRecord = {
       ...attrs,
       password: `${buf.toString('hex')}.${salt}`
     };
 
-    records.push(newRecord);
-
-    await this.writeAll(records);
+    await getDb().collection(this.sourcename).insertOne(newRecord);
 
     return newRecord;
   }
@@ -30,4 +27,4 @@ class UsersRepository extends Repository {
   }
 }
 
-module.exports = new UsersRepository('users.json');
+module.exports = new UsersRepository('users');

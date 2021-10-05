@@ -1,5 +1,12 @@
 const express = require('express');
 const cookieSession = require('cookie-session');
+const config = require('config');
+
+const mongoUtil = require('./repositories/mongoUtil');
+
+mongoUtil.connectToServer().catch(error => {
+  throw error;
+});
 
 const authRouter = require('./routes/admin/auth');
 const adminProductsRouter = require('./routes/admin/products');
@@ -13,7 +20,7 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cookieSession({
-    keys: ['38Hsd981+okljde<tm1xNzf3']
+    keys: [config.get('security.cookieKey')]
   })
 );
 app.use(authRouter);

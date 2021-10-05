@@ -23,10 +23,10 @@ router.post(
   [requireEmail, requirePassword, requirePasswordConfirmation],
   handleErrors(signupTemplate),
   async (req, res) => {
-    const { email, password, passwordConfirmation } = req.body;
+    const { email, password } = req.body;
     const user = await usersRepo.create({ email, password });
     // properties added to req.session also gets added to the response
-    req.session.userId = user.id;
+    req.session.userId = user._id.toString();
     res.redirect('/admin/products');
   }
 );
@@ -47,7 +47,7 @@ router.post(
   async (req, res) => {
     const { email } = req.body;
     const user = await usersRepo.getOneBy({ email });
-    req.session.userId = user.id;
+    req.session.userId = user._id.toString();
     res.redirect('/admin/products');
   }
 );

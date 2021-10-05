@@ -8,14 +8,14 @@ module.exports = ({ products, csrfToken }) => {
         <td>${product.title}</td>
         <td>${product.price}</td>
         <td>
-          <a href="/admin/products/${product.id}/edit">
+          <a href="/admin/products/${product._id.toString()}/edit">
             <button class="button is-link">
               Edit
             </button>
           </a>
         </td>
         <td>
-          <form method="POST" action="/admin/products/${product.id}/delete">
+          <form method="POST" action="/admin/products/${product._id.toString()}/delete">
             <input type="hidden" name="_csrf" value="${csrfToken}">
             <button class="button is-danger">Delete</button>
           </form>

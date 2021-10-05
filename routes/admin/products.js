@@ -87,6 +87,7 @@ router.post(
     try {
       await productsRepo.update(req.params.id, changes);
     } catch (err) {
+      console.log('update err', err); // TODO: display this some other way
       return res.send('Could not find item');
     }
 
